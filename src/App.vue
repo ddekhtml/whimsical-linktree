@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import Data from './components/Data.vue'
 import { supabase } from './utils/supabase'
-
+import bgImage from './assets/image.png'
 const search = ref('')
 const length = ref(0)
 const craft = ref([])
@@ -131,7 +131,9 @@ onMounted(() => {
   <div class="w-full min-h-screen bg-soft-pink flex justify-center overflow-hidden">
     <div
       class="w-107.5 h-screen overflow-y-auto scrollbar-none bg-cover bg-center bg-no-repeat"
-      style="background-image: url('/src/assets/image.png');"
+      :style="{
+    backgroundImage: `url(${bgImage})`
+  }"
       ref="container"
     >
       <div class="w-full mb-30">
