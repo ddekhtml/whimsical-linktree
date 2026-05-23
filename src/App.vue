@@ -1,102 +1,186 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import Data from './components/Data.vue'
+import { supabase } from './utils/supabase'
 
 const search = ref('')
-const currentPage = ref(1)
+const length = ref(0)
+const craft = ref([])
 
-const sections = Array.from({ length: 30 }, (_, i) => ({
-  id: i + 1
-}))
+const isSearch = ref(false)
+const isPagination = ref(1)
 
-const perPage = 10
+const lengthPerPagination = 10
 
-const totalPage = computed(() => {
-  return Math.ceil(sections.length / perPage)
+const pagination = computed(() => {
+
+  if (length.value === 0) {
+    return 1
+  }
+
+  return Math.ceil(
+    length.value / lengthPerPagination
+  )
+
 })
 
-const paginatedSections = computed(() => {
-  const start = (currentPage.value - 1) * perPage
-  return sections.slice(start, start + perPage)
+const nowDataPagination = computed(() => {
+
+  const remaining =
+    length.value -
+    (
+      (isPagination.value - 1) *
+      lengthPerPagination
+    )
+
+  return Math.min(
+    remaining,
+    lengthPerPagination
+  )
+
+})
+async function getCraft() {
+
+  const from =
+    (isPagination.value - 1) *
+    lengthPerPagination
+
+  const to =
+    from + lengthPerPagination - 1
+
+  let query = supabase
+    .from('Craft')
+    .select(`
+      *,
+      Product (*)
+    `, {
+      count: 'exact'
+    })
+  if (search.value.trim() !== '') {
+
+    isSearch.value = true
+
+    query = query.ilike(
+      'name',
+      `%${search.value}%`
+    )
+
+  } else {
+
+    isSearch.value = false
+
+  }
+  query = query.range(from, to)
+
+  const {
+    data,
+    error,
+    count
+  } = await query
+
+  if (error) {
+
+    console.log(error)
+
+  } else {
+
+    craft.value = data
+    length.value = count
+
+  }
+
+}
+
+const container = ref(null)
+
+function changePage(page) {
+
+  isPagination.value = page
+  getCraft()
+
+  container.value.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+
+}
+
+let timeout = null
+
+watch(search, () => {
+
+  clearTimeout(timeout)
+
+  timeout = setTimeout(() => {
+
+    isPagination.value = 1
+    getCraft()
+
+  }, 500)
+
+})
+
+onMounted(() => {
+
+  getCraft()
+
 })
 </script>
 
 <template>
   <div class="w-full min-h-screen bg-soft-pink flex justify-center overflow-hidden">
-    
-    <div class="relative w-[430px] h-screen overflow-hidden">
+    <div
+      class="w-107.5 h-screen overflow-y-auto scrollbar-none bg-cover bg-center bg-no-repeat"
+      style="background-image: url('/src/assets/image.png');"
+      ref="container"
+    >
+      <div class="w-full mb-30">
+        
+        <video src="/src/assets/510d4332199e43fa84044b09969b86f7.webm" autoplay loop muted></video>
+        <div class="w-[90%] flex justify-center items-center gap-4 mx-auto mt-3 text-fushia">
+  
+          <div class="flex items-center gap-2 bg-button/10 px-4 py-2 rounded-full backdrop-blur-sm">
+            <a href="https://www.instagram.com/ddekhtml/">
+              <i class="pi pi-instagram"></i>
+            </a>
+            
+          </div>
 
-      <img 
-        src="/src/assets/bg.png" 
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover"
-      >
-
-      <div class="absolute top-55 left-1/2 -translate-x-1/2 z-10 w-[85%] bg-button/20 rounded-full pl-7 pr-3 py-2 text-xl flex items-center gap-4 text-fushia backdrop-blur-md">
-
-        <input
-          type="text"
-          v-model="search"
-          placeholder="search"
-          class="outline-none w-full bg-transparent placeholder:text-fushia"
-        >
-
-        <button class="pi pi-search text-soft-pink bg-fushia rounded-full w-10 h-10 flex items-center justify-center text-sm shrink-0">
-        </button>
-
-      </div>
-
-
-      <div class="absolute top-[300px] bottom-5 left-1/2 -translate-x-1/2 z-10 w-[85%] flex flex-col">
-        <div class="flex-1 overflow-y-auto flex flex-col gap-5 pb-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div 
-            v-for="section in paginatedSections" 
-            :key="section.id"
-            class="rounded-[35px] bg-pink-200/55 backdrop-blur-md p-5"
-          >
-            <div class="flex items-center justify-between mb-4">
-
-              <h2 class="text-pink-700 text-xl font-semibold">
-                Ribbon Rosette
-              </h2>
-
-              <button class="bg-pink-400 text- text-white rounded-full px-4 py-1 text-sm">
-                <span class="pi pi-tiktok font-yuji text-3xl"> video </span>
-              </button>
-
-            </div>
-
-            <!-- HORIZONTAL SCROLL -->
-            <div class="flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-
-              <div
-                v-for="n in 10"
-                :key="n"
-                class="min-w-[120px] h-[150px] rounded-[25px] bg-pink-300/70 flex items-center justify-center text-pink-700 font-bold flex-shrink-0"
-              >
-                {{ n }}
-              </div>
-
-            </div>
-
+          <div class="flex items-center gap-2 bg-button/10 px-4 py-2 rounded-full backdrop-blur-sm">
+            <a href="https://www.tiktok.com/@litlecorner">
+              <i class="pi pi-tiktok"></i>
+            </a>
+          </div>
+          <div class="flex items-center gap-2 bg-button/10 px-4 py-2 rounded-full backdrop-blur-sm">
+            <a href="mailto:emailkamu@gmail.com?subject=Collaborate Litle Corner">
+              <i class="pi pi-envelope"></i>
+            </a>
           </div>
 
         </div>
-        <div class="flex justify-center gap-2 pt-2">
-
-          <button
-            v-for="page in totalPage"
-            :key="page"
-            @click="currentPage = page"
-            class="w-10 h-10 rounded-2xl transition-all"
-            :class="
-              currentPage === page
-              ? 'bg-pink-500 text-white scale-110'
-              : 'bg-pink-200 text-pink-700'
-            "
+        <div class="bg-button/20 text-fushia rounded-full py-2 pl-5 w-[90%] text-xl mx-auto mt-5 flex gap-2">
+  
+          <input
+            type="text"
+            placeholder="search"
+            class="outline-none w-full bg-transparent"
+            v-model="search"
           >
-            {{ page }}
-          </button>
-
+        </div>
+        <div class="w-[90%] mx-auto mt-3 flex flex-col gap-3 ">
+          <div v-if="craft.length===0 && isSearch===true && search.length!== 0" class="text-center text-fushia ">
+            {{ search }} tidak ditemukan
+          </div>
+          <div v-for="n in craft" >
+            
+            <Data  :name="n.name" :tiktok="n.tiktok" :instagram="n.instagram" :product="n.Product"/> 
+          </div>
+        </div>
+        <div class="flex w-[80%] mx-auto text-xl mt-5 justify-center gap-4 overflow-x-auto scrollbar-none">
+          <div v-for="n in pagination" class="w-fit px-2 hover:cursor-pointer py-1 rounded-xl" :class="isPagination===n?'bg-button text-soft-pink':' bg-button/20 text-fushia '" @click="changePage(n)">
+            {{ n }}
+          </div>
+          
         </div>
 
       </div>
