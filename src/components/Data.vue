@@ -27,7 +27,8 @@ const props=defineProps(
     >
 
       <a class=" my-3 flex flex-col gap-2" :href="n.link">
-        <img :src="n.image" alt="" class="h-30 w-25 object-cover border-3 border-soft-pink rounded-2xl">
+        <img :src="n.image" alt="" class="h-30 w-25 object-cover border-3 border-soft-pink rounded-2xl filter saturate-75 contrast-80 brightness-110 
+            hue-rotate-[-5deg]">
         <div class="text-center text-[15px] w-25 ">
           {{n.description}}
         </div>

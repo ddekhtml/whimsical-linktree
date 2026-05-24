@@ -138,7 +138,7 @@ onMounted(() => {
     >
       <div class="w-full mb-30">
         
-        <video src="/src/assets/510d4332199e43fa84044b09969b86f7.webm" autoplay loop muted></video>
+        <img src="/src/assets/bc8d828b-2eda-4e51-bc2c-75a788f76e39.png" alt="">
         <div class="w-[90%] flex justify-center items-center gap-4 mx-auto mt-3 text-fushia">
   
           <div class="flex items-center gap-2 bg-button/10 px-4 py-2 rounded-full backdrop-blur-sm">
